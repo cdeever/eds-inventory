@@ -71,5 +71,5 @@ up, not argued again.
 
 - [Sources, Store and Clients](system/): how music comes in, where it is
   kept, and who asks for it.
-- [Where It Runs](tenant/): its own Deevnet IoTaaS tenant.
+- [Where It Runs](tenant/): in EdS's Deevnet IoTaaS tenant, and why.
 - [Decisions](decisions/): every choice, argued.

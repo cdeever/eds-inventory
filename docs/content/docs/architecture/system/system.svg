@@ -17,7 +17,7 @@
 <g id="clust2" class="cluster">
 <title>cluster_tenant</title>
 <path fill="#eef7f1" stroke="#8fbf9f" d="M304.5,-114C304.5,-114 852.87,-114 852.87,-114 858.87,-114 864.87,-120 864.87,-126 864.87,-126 864.87,-246 864.87,-246 864.87,-252 858.87,-258 852.87,-258 852.87,-258 304.5,-258 304.5,-258 298.5,-258 292.5,-252 292.5,-246 292.5,-246 292.5,-126 292.5,-126 292.5,-120 298.5,-114 304.5,-114"/>
-<text xml:space="preserve" text-anchor="middle" x="438.12" y="-241.65" font-family="Helvetica,Arial,sans-serif" font-size="13.00">eds&#45;inventory · its own Deevnet IoTaaS tenant</text>
+<text xml:space="preserve" text-anchor="middle" x="441.5" y="-241.65" font-family="Helvetica,Arial,sans-serif" font-size="13.00">eds&#45;inventory · in EdS&#39;s Deevnet IoTaaS tenant</text>
 </g>
 <g id="clust3" class="cluster">
 <title>cluster_clients</title>
@@ -176,7 +176,7 @@
 <path fill="#f8d2d2" stroke="#5b6470" d="M1110.03,-169.76C1110.03,-169.76 974.37,-169.76 974.37,-169.76 968.37,-169.76 962.37,-163.76 962.37,-157.76 962.37,-157.76 962.37,-134.24 962.37,-134.24 962.37,-128.24 968.37,-122.24 974.37,-122.24 974.37,-122.24 1110.03,-122.24 1110.03,-122.24 1116.03,-122.24 1122.03,-128.24 1122.03,-134.24 1122.03,-134.24 1122.03,-157.76 1122.03,-157.76 1122.03,-163.76 1116.03,-169.76 1110.03,-169.76"/>
 <text xml:space="preserve" text-anchor="middle" x="1042.2" y="-153.55" font-family="Helvetica,Arial,sans-serif" font-size="11.00">EdS</text>
 <text xml:space="preserve" text-anchor="middle" x="1042.2" y="-141.55" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Now Playing · Voice Request</text>
-<text xml:space="preserve" text-anchor="middle" x="1042.2" y="-129.55" font-family="Helvetica,Arial,sans-serif" font-size="11.00">its own tenant</text>
+<text xml:space="preserve" text-anchor="middle" x="1042.2" y="-129.55" font-family="Helvetica,Arial,sans-serif" font-size="11.00">the same tenant</text>
 </g>
 <!-- api&#45;&gt;eds -->
 <g id="edge11" class="edge">

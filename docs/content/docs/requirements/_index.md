@@ -27,7 +27,8 @@ listed as a question.
 - **It is asked over HTTP**, with a versioned JSON contract (`"v": 1`) and an
   OpenAPI document.
 - **It knows nothing about its clients.**
-- **It runs in a Deevnet IoTaaS tenant of its own**, separate from EdS's.
+- **It runs in EdS's Deevnet IoTaaS tenant**, beside EdS's services: a
+  tenant has no way in from another, so its clients must share it.
 - **It is a monorepo** of independent services, a database, and the
   workflows that collect and enrich.
 
@@ -59,7 +60,8 @@ From [EdS's proposal](https://cdeever.github.io/eds/docs/architecture/proposals/
 - **Covers.** Stored by the inventory, or pointed to; at what sizes.
 - **The contract.** Which questions are asked, and what an answer that is not
   sure looks like.
-- **How EdS reaches it**, from one tenant to another.
+- **Which services run where**, when EdS's one-Pi back end becomes
+  several, and where the inventory's part of the tenant is declared.
 - **Editing.** Whether the owner corrects the inventory directly, or only at
   the sources.
 - **Formats with no service behind them**, such as CDs: how they are entered.

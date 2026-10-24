@@ -23,7 +23,7 @@ digraph inventory {
     }
 
     subgraph cluster_tenant {
-        label="eds-inventory · its own Deevnet IoTaaS tenant"; labeljust=l; style="rounded,filled"; fillcolor="#eef7f1"; color="#8fbf9f";
+        label="eds-inventory · in EdS's Deevnet IoTaaS tenant"; labeljust=l; style="rounded,filled"; fillcolor="#eef7f1"; color="#8fbf9f";
         collect [label="Collectors\none for each source"];
         store   [label="The store\nevery album, one identity,\ncross-references, covers\n(database to be chosen)", shape=cylinder, fillcolor="#cfe9d8", margin="0.2,0.15"];
         enrich  [label="Enrichment\nonce per album"];
@@ -34,7 +34,7 @@ digraph inventory {
 
     subgraph cluster_clients {
         label="Clients"; labeljust=l; style="rounded,filled"; fillcolor="#fdeeee"; color="#d9a3a3";
-        eds    [label="EdS\nNow Playing · Voice Request\nits own tenant", fillcolor="#f8d2d2"];
+        eds    [label="EdS\nNow Playing · Voice Request\nthe same tenant", fillcolor="#f8d2d2"];
         others [label="Others, later", style="rounded,dashed", color="#9aa1aa"];
     }
 

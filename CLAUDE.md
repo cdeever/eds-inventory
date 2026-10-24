@@ -7,8 +7,9 @@ code in this repository.
 
 eds-inventory is one inventory of the owner's music, in every format, with
 one identity per album, enriched once and asked over HTTP. Its first client
-is EdS (`../eds`, <https://github.com/cdeever/eds>). It runs in a Deevnet
-IoTaaS tenant of its own, separate from EdS's.
+is EdS (`../eds`, <https://github.com/cdeever/eds>). It runs in EdS's
+Deevnet IoTaaS tenant, beside EdS's services, because a tenant has no way in
+from another; it shares the tenant, not the codebase or the boundary.
 
 A monorepo of independent projects, as EdS is: each has its own `Makefile`
 and README, and nothing builds the whole. Only `docs/` exists so far.
