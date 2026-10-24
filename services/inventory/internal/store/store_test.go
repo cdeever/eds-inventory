@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -131,5 +133,51 @@ func TestADatabaseIsOpenedAgainAsItWasLeft(t *testing.T) {
 	artists, _ := s.Artists(ctx)
 	if len(artists) != 1 {
 		t.Errorf("%+v", artists)
+	}
+}
+
+// The data dictionary (docs/.../reference/schema) names every table and
+// column the schema makes: it is the schema's description, as openapi.json
+// is the contract's.
+func TestTheDataDictionaryDescribesEveryColumn(t *testing.T) {
+	doc, err := os.ReadFile("../../../../docs/content/docs/reference/schema/index.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := open(t)
+	rows, err := s.db.Query(`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var tables []string
+	for rows.Next() {
+		var n string
+		rows.Scan(&n)
+		tables = append(tables, n)
+	}
+	rows.Close()
+	for _, table := range tables {
+		head := "### `" + table + "`"
+		i := strings.Index(string(doc), head)
+		if i < 0 {
+			t.Errorf("no %s in the data dictionary", head)
+			continue
+		}
+		section := string(doc)[i+len(head):]
+		if j := strings.Index(section, "\n### "); j >= 0 {
+			section = section[:j]
+		}
+		cols, err := s.db.Query(`SELECT name FROM pragma_table_info(?)`, table)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for cols.Next() {
+			var c string
+			cols.Scan(&c)
+			if !strings.Contains(section, "| `"+c+"` |") {
+				t.Errorf("%s.%s is not in the data dictionary", table, c)
+			}
+		}
+		cols.Close()
 	}
 }
