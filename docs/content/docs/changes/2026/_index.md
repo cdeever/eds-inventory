@@ -8,4 +8,4 @@ bookCollapseSection: true
 
 | ID | Date | Change | Type | Status |
 |---|---|---|---|---|
-| CHG-0001 | 2026-10-24 | [inventoryd on EdS's Workload](0001-inventoryd-on-eds-workload/) | Deployment | {{< status-badge "planned" "Planned" >}} |
+| CHG-0001 | 2026-10-24 | [inventoryd on EdS's Workload](0001-inventoryd-on-eds-workload/) | Deployment | {{< status-badge "complete" "Complete" >}} |

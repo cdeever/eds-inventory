@@ -7,7 +7,7 @@ weight: 3
 
 | | |
 |---|---|
-| **Status** | {{< adr-status "Proposed" >}} — until EdS's voiced has asked it there and played what it answered |
+| **Status** | {{< adr-status "Accepted" >}} 2026-10-24 |
 | **Date** | 2026-10-24 |
 | **Scope** | How inventoryd reaches the machine it runs on, and how a library reaches it. Not which machine that is in the long run: EdS's back end may become several Pis, and which services go where is open. |
 | **Extends** | [Where It Runs](/docs/architecture/tenant/): EdS's tenant, since a tenant has no way in from another |
@@ -65,3 +65,7 @@ on the Builder and runs it on EdS's services workload as
 
 - inventoryd running on the workload with the owner's library collected,
   and EdS's voiced asking it for a spoken request.
+
+**Settled, 2026-10-24** ([CHG-0001](/docs/changes/2026/0001-inventoryd-on-eds-workload/),
+EdS CHG-0041): deployed by its own `deploy/`, the library collected from the
+albums alone, and asked by voiced for a spoken request that played.

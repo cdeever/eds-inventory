@@ -7,7 +7,7 @@ weight: 1
 
 | | |
 |---|---|
-| **Status** | {{< adr-status "Proposed" >}} — until a real library has been collected and asked, on the machine it will run on |
+| **Status** | {{< adr-status "Accepted" >}} 2026-10-24 |
 | **Date** | 2026-10-24 |
 | **Scope** | The language of eds-inventory's services, and the database the inventory is kept in. Not how sources are matched to one another, which is later. |
 
@@ -69,3 +69,8 @@ SQLite, through `modernc.org/sqlite`, with no cgo anywhere.**
 
 - The owner's real iTunes library collected, and the inventory asked, on the
   machine it will run on, with times that are no concern.
+
+**Settled, 2026-10-24** ([CHG-0001](/docs/changes/2026/0001-inventoryd-on-eds-workload/)):
+the owner's library, 3,665 albums by 1,912 artists, collected on EdS's
+services workload in one transaction, and asked in 10 to 17 ms. The
+database is 1.4 MB.
