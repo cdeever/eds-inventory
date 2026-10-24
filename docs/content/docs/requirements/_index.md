@@ -31,6 +31,10 @@ listed as a question.
   tenant has no way in from another, so its clients must share it.
 - **It is a monorepo** of independent services, a database, and the
   workflows that collect and enrich.
+- **Go services, and SQLite to start**, with no cgo; Postgres if it is
+  outgrown ([ADR-0001](/docs/architecture/decisions/0001-go-services-and-a-sqlite-store/)).
+- **The first source is the iTunes library**, collected from its XML
+  ([ADR-0002](/docs/architecture/decisions/0002-the-itunes-library-is-collected-from-its-xml/)).
 
 ## What its first client would ask
 
@@ -44,8 +48,6 @@ From [EdS's proposal](https://cdeever.github.io/eds/docs/architecture/proposals/
 
 ## Open
 
-- **The database.** What kind; SQLite may be enough for one owner's
-  collection.
 - **Collecting.** How each source is read (an API, an export, a file on the
   media server), and how often, or on what signal.
 - **Matching.** How a record in Discogs, a folder in MusicBee and a saved

@@ -15,7 +15,7 @@ It knows nothing about EdS.
 
 ## Status
 
-Requirements are being gathered. Nothing is built yet.
+Requirements are being gathered. The first slice, the owner's iTunes library, is built: collected from its XML into SQLite and asked over HTTP.
 
 ## Layout
 
@@ -24,10 +24,8 @@ as EdS is. Nothing builds the repository as a whole.
 
 | Path | What | Build entry |
 |---|---|---|
+| `services/inventory` | Go 1.26, SQLite: the store, the iTunes collector, the HTTP API | `make check build run` |
 | `docs` | Hugo, the hugo-book theme | `make server` |
-
-Services, the database and the collection and enrichment workflows will be
-added beside it as they are decided.
 
 After a fresh clone:
 

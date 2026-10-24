@@ -66,7 +66,7 @@ keep them apart:
 
 ## Records
 
-None yet.
-
 | ADR | Date | Decision | Status |
 |---|---|---|---|
+| [0001](0001-go-services-and-a-sqlite-store/) | 2026-10-24 | The services are Go, and the inventory is kept in SQLite, with no cgo | {{< adr-status "Proposed" >}} |
+| [0002](0002-the-itunes-library-is-collected-from-its-xml/) | 2026-10-24 | The iTunes library is collected from its XML, and asked for by nearest name | {{< adr-status "Proposed" >}} |
