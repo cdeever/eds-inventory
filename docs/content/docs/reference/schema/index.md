@@ -10,6 +10,10 @@ version **1** (kept in `PRAGMA user_version`). Nothing but `internal/store`
 reads or writes it
 ([ADR-0001](/docs/architecture/decisions/0001-go-services-and-a-sqlite-store/)).
 
+This schema is being reworked; the changes agreed so far are on
+[Proposed Schema](../schema-proposed/), and this page stays what runs until
+they are built.
+
 [![The inventory's tables: artists, albums, holdings and collections, and how they refer to one another.](schema.svg)](schema.svg)
 
 **An album is the inventory's; a holding is a source's.** Each source that
