@@ -1,0 +1,8 @@
+# Hugo (docs/). The theme is a submodule; public/ and resources/ are build
+# output, and .hugo_build.lock is a transient held only while hugo runs.
+docs/public/
+docs/resources/
+docs/.hugo_build.lock
+
+# macOS
+.DS_Store
