@@ -24,7 +24,10 @@ and README, and nothing builds the whole.
 `services/nowplaying/internal/library` (EdS ADR-0046); their thresholds were
 measured there. Only `internal/store` writes SQL. The contract is
 `internal/api`, and `internal/api/openapi.json` is held to its routes by a
-test: change both together. **An owner's library, and any database made
+test: change both together. Likewise the schema in `internal/store` is
+drawn and described in `docs/content/docs/reference/schema/` (`schema.dot`
+and a data dictionary); a store test fails if a column is missing from the
+dictionary. **An owner's library, and any database made
 from it, is never committed.**
 
 `deploy/load.sh` is EdS's, copied; keep them alike (EdS INC-0002: never

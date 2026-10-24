@@ -28,3 +28,9 @@ nearest thing the inventory has.
 An album is `{id, title, year, tracks, compilation, sources}`: `title` as the
 source spells it, so a player asked for it by name finds it, and `id` the
 inventory's own (`al_` and twelve hex digits), kept across collections.
+
+## The database
+
+[Database Schema](schema/) draws the inventory's tables and describes every
+column in a data dictionary. Clients never read the database; it is
+described for those who change the inventory.

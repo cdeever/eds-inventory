@@ -1,0 +1,51 @@
+// The inventory's database, as internal/store creates it (schema version 1).
+// Drawn by GraphViz: `make -C docs diagrams` writes schema.svg beside this
+// file, and both are committed. Change this with the schema in
+// internal/store/store.go and the data dictionary beside it.
+digraph schema {
+    graph [rankdir=LR, bgcolor="white", pad=0.3, nodesep=0.5, ranksep=1.0,
+           fontname="Helvetica,Arial,sans-serif"];
+    node  [shape=plaintext, fontname="Helvetica,Arial,sans-serif", fontsize=11];
+    edge  [color="#5b6470", arrowsize=0.7, fontname="Helvetica,Arial,sans-serif", fontsize=9, fontcolor="#3a4048"];
+
+    artists [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#8fbf9f">
+        <tr><td bgcolor="#cfe9d8" colspan="2"><b>artists</b></td></tr>
+        <tr><td port="id" align="left"><b>id</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">name</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">folded</td><td align="left">TEXT · UNIQUE</td></tr>
+      </table>>];
+
+    albums [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#d6c06a">
+        <tr><td bgcolor="#fdecb0" colspan="2"><b>albums</b></td></tr>
+        <tr><td port="id" align="left"><b>id</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">artist_id</td><td port="artist_id" align="left">TEXT · FK</td></tr>
+        <tr><td align="left">title</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">year</td><td align="left">INTEGER</td></tr>
+        <tr><td align="left">compilation</td><td align="left">INTEGER (0/1)</td></tr>
+      </table>>];
+
+    holdings [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#d9b77a">
+        <tr><td bgcolor="#fbe2b6" colspan="2"><b>holdings</b></td></tr>
+        <tr><td align="left"><b>source</b></td><td port="source" align="left">TEXT · PK</td></tr>
+        <tr><td align="left"><b>key</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">album_id</td><td port="album_id" align="left">TEXT · FK</td></tr>
+        <tr><td align="left">title</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">tracks</td><td align="left">INTEGER</td></tr>
+        <tr><td align="left">collected</td><td align="left">TEXT (RFC 3339)</td></tr>
+      </table>>];
+
+    collections [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#9db4cf">
+        <tr><td bgcolor="#dbe7f5" colspan="2"><b>collections</b></td></tr>
+        <tr><td port="source" align="left"><b>source</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">collected</td><td align="left">TEXT (RFC 3339)</td></tr>
+        <tr><td align="left">albums</td><td align="left">INTEGER</td></tr>
+      </table>>];
+
+    albums:artist_id:e -> artists:id:w [label="many albums\nby one artist"];
+    holdings:album_id:e -> albums:id:w [label="each source's holding\nof one album"];
+    holdings:source:e -> collections:source:w [style=dashed, arrowhead=none, label="the source's\nlast collection"];
+}
