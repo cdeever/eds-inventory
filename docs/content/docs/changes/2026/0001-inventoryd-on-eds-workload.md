@@ -9,7 +9,7 @@ weight: 1
 |---|---|
 | **Date** | 2026-10-24 |
 | **Change type** | Deployment |
-| **Status** | {{< status-badge "planned" "Planned" >}} |
+| **Status** | {{< status-badge "complete" "Complete" >}} 2026-10-24 |
 | **Systems** | EdS's services workload (`services.eds.mobile.deevnet.net`): the image `localhost/eds-inventory`, `eds-inventory.service`, `/var/lib/eds-inventory` |
 | **How** | `make -C deploy image load WHERE=builder`, `make -C deploy unit`, `make -C deploy library XML=…` |
 | **Risk** | Low. Nothing running asks it until EdS's voiced is pointed at it (EdS CHG-0041). Most likely to go wrong: the Builder's first build of the image |
@@ -47,8 +47,16 @@ the image. Nothing else uses them.
 
 ## Outcome
 
-*Completed after the change has run.*
-
-| When | Step | What happened |
+| When (UTC) | Step | What happened |
 |---|---|---|
-| | | |
+| 18:07:25–18:08:32 | 1 | Built on the Builder; `load.sh` sent 8.8 MB at 5 MB/s: `sources unknown -> 6ff2f8829314062a` |
+| 18:08:46 | 2 | `eds-inventory.service` enabled and started: `inventoryd listening`, `version=0669318`, `artists=0` |
+| 18:09:00 | 3 | The albums sent and collected: `itunes: 3665 albums; 3665 new, 0 kept, 0 gone`. The albums file removed on both machines |
+| 18:09 | Verify | `/v1/artists/find?name=Arrowsmith` on the workload answered Aerosmith |
+| 18:25:31 | — | EdS's voiced asked it for "Led Zeppelin's first album" and played what it answered (EdS CHG-0041) |
+
+Lookups on the workload take 10 to 17 ms.
+
+### Departures from the plan
+
+- None.

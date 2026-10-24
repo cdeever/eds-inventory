@@ -7,7 +7,7 @@ weight: 2
 
 | | |
 |---|---|
-| **Status** | {{< adr-status "Proposed" >}} — until EdS's voiced asks the inventory in place of its own index |
+| **Status** | {{< adr-status "Accepted" >}} 2026-10-24 |
 | **Date** | 2026-10-24 |
 | **Scope** | The first source, the owner's iTunes library: how it is read, how its albums are kept, and the first version of the contract that answers for it. Not how the XML reaches the inventory, which waits on where the inventory runs. |
 | **Takes over** | EdS ADR-0046, whose index of the library this replaces |
@@ -70,3 +70,7 @@ itunes FILE`, and asked for over HTTP, contract version 1.**
 ## What would settle it
 
 - voiced asks the inventory for a spoken request, and plays what it answers.
+
+**Settled, 2026-10-24** (EdS CHG-0041): EdS's voiced asked the inventory
+for "Led Zeppelin's first album", and iTunes played the album it answered.
+The same 1,912 artists and 3,665 albums as EdS's own index of the same XML.
