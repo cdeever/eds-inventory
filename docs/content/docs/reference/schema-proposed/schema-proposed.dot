@@ -1,0 +1,122 @@
+// The inventory's database as proposed on 2026-10-24, not yet built. Drawn
+// by GraphViz: `make -C docs diagrams` writes schema-proposed.svg beside this
+// file, and both are committed. Tables reviewed so far are in color; those
+// only renamed, and still to be reviewed, are gray.
+digraph schema_proposed {
+    graph [rankdir=LR, bgcolor="white", pad=0.3, nodesep=0.5, ranksep=1.0,
+           fontname="Helvetica,Arial,sans-serif"];
+    node  [shape=plaintext, fontname="Helvetica,Arial,sans-serif", fontsize=11];
+    edge  [color="#5b6470", arrowsize=0.7, fontname="Helvetica,Arial,sans-serif", fontsize=9, fontcolor="#3a4048"];
+
+    artist [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#8fbf9f">
+        <tr><td bgcolor="#cfe9d8" colspan="2"><b>artist</b></td></tr>
+        <tr><td port="id" align="left"><b>id</b></td><td port="idr" align="left">TEXT · PK</td></tr>
+        <tr><td align="left">name</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">folded</td><td align="left">TEXT · UNIQUE</td></tr>
+        <tr><td align="left">kind</td><td align="left">TEXT · NULL</td></tr>
+      </table>>];
+
+    album [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#d6c06a">
+        <tr><td bgcolor="#fdecb0" colspan="2"><b>album</b></td></tr>
+        <tr><td port="id" align="left"><b>id</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">artist_id</td><td port="artist_id" align="left">TEXT · FK · NULL</td></tr>
+        <tr><td align="left">title</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">release_group</td><td port="release_group" align="left">TEXT · FK · NULL</td></tr>
+      </table>>];
+
+    holding [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#d9b77a">
+        <tr><td bgcolor="#fbe2b6" colspan="2"><b>holding</b></td></tr>
+        <tr><td port="source" align="left"><b>source</b></td><td port="sourcer" align="left">TEXT · PK</td></tr>
+        <tr><td port="key" align="left"><b>key</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">album_id</td><td port="album_id" align="left">TEXT · FK</td></tr>
+        <tr><td align="left">source_title</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">copy_year</td><td align="left">INTEGER · NULL</td></tr>
+        <tr><td align="left">collected_at</td><td align="left">TEXT (RFC 3339)</td></tr>
+      </table>>];
+
+    track [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#c79a9a">
+        <tr><td bgcolor="#f3d6d6" colspan="2"><b>track</b></td></tr>
+        <tr><td align="left"><b>id</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">source</td><td port="holding" align="left">TEXT · FK</td></tr>
+        <tr><td align="left">holding_key</td><td align="left">TEXT · FK</td></tr>
+        <tr><td align="left">key</td><td align="left">TEXT · UNIQUE with source</td></tr>
+        <tr><td align="left">disc</td><td align="left">INTEGER · NULL</td></tr>
+        <tr><td align="left">number</td><td align="left">INTEGER · NULL</td></tr>
+        <tr><td align="left">title</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">artist_id</td><td port="artist_id" align="left">TEXT · FK</td></tr>
+        <tr><td align="left">length_ms</td><td align="left">INTEGER · NULL</td></tr>
+      </table>>];
+
+    release_group [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#a99bd0">
+        <tr><td bgcolor="#e2dcf5" colspan="2"><b>release_group</b></td></tr>
+        <tr><td port="mbid" align="left"><b>mbid</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">title</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">released</td><td align="left">TEXT (ISO date) · NULL</td></tr>
+        <tr><td align="left">primary_type</td><td align="left">TEXT · NULL</td></tr>
+        <tr><td align="left">fetched_at</td><td align="left">TEXT (RFC 3339)</td></tr>
+      </table>>];
+
+    discography_entry [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#a99bd0">
+        <tr><td bgcolor="#e2dcf5" colspan="2"><b>discography_entry</b></td></tr>
+        <tr><td align="left"><b>artist_id</b></td><td port="artist_id" align="left">TEXT · PK · FK</td></tr>
+        <tr><td align="left"><b>release_group</b></td><td port="release_group" align="left">TEXT · PK · FK</td></tr>
+      </table>>];
+
+    collection [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#b8bcc2">
+        <tr><td bgcolor="#e6e8eb" colspan="2"><b>collection</b> (to review)</td></tr>
+        <tr><td port="source" align="left"><b>source</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">collected_at</td><td align="left">TEXT (RFC 3339)</td></tr>
+        <tr><td align="left">albums</td><td align="left">INTEGER</td></tr>
+      </table>>];
+
+    discography [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#b8bcc2">
+        <tr><td bgcolor="#e6e8eb" colspan="2"><b>discography</b> (to review)</td></tr>
+        <tr><td align="left"><b>artist_id</b></td><td port="artist_id" align="left">TEXT · PK · FK</td></tr>
+        <tr><td align="left">mbid</td><td align="left">TEXT · NULL</td></tr>
+        <tr><td align="left">name</td><td align="left">TEXT · NULL</td></tr>
+        <tr><td align="left">is_found</td><td align="left">INTEGER (0/1)</td></tr>
+        <tr><td align="left">fetched_at</td><td align="left">TEXT (RFC 3339)</td></tr>
+      </table>>];
+
+    artist_alias [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#b8bcc2">
+        <tr><td bgcolor="#e6e8eb" colspan="2"><b>artist_alias</b> (to review)</td></tr>
+        <tr><td align="left"><b>artist_id</b></td><td port="artist_id" align="left">TEXT · PK · FK</td></tr>
+        <tr><td align="left">alias</td><td align="left">TEXT</td></tr>
+        <tr><td align="left"><b>folded</b></td><td align="left">TEXT · PK</td></tr>
+      </table>>];
+
+    release_title [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#b8bcc2">
+        <tr><td bgcolor="#e6e8eb" colspan="2"><b>release_title</b> (to review)</td></tr>
+        <tr><td align="left"><b>release_group</b></td><td port="release_group" align="left">TEXT · PK · FK</td></tr>
+        <tr><td align="left"><b>title</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">uses</td><td align="left">INTEGER</td></tr>
+      </table>>];
+
+    enrichment [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#b8bcc2">
+        <tr><td bgcolor="#e6e8eb" colspan="2"><b>enrichment</b> (to review)</td></tr>
+        <tr><td align="left">n</td><td align="left">INTEGER</td></tr>
+      </table>>];
+
+    album:artist_id:e -> artist:id:w [label="an album's artist,\nnone for a compilation"];
+    track:artist_id:e -> artist:id:w [label="each track's\nown artist"];
+    holding:album_id:e -> album:id:w [label="each source's\ncopy of one album"];
+    track:holding:e -> holding:source:w [label="the tracks\nof one copy"];
+    holding:sourcer:e -> collection:source:w [style=dashed, arrowhead=none, label="the source's\nlast collection"];
+    album:release_group:e -> release_group:mbid:w [label="once matched"];
+    discography_entry:release_group:e -> release_group:mbid:w [label="a studio album"];
+    discography_entry:artist_id:e -> artist:idr:e [label="the artist's\nstudio albums"];
+    discography:artist_id:e -> artist:idr:e [label="enriched once"];
+    artist_alias:artist_id:e -> artist:idr:e [label="other names"];
+    release_title:release_group:e -> release_group:mbid:e [label="its releases'\nother titles"];
+}
