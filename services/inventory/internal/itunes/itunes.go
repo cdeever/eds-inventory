@@ -25,12 +25,12 @@ const Source = "itunes"
 type Album struct {
 	// Key says which album this is in the library across collections: its
 	// artist and title, folded. iTunes gives albums no ID of their own.
-	Key         string
-	Artist      string
-	Title       string
-	Year        int
-	Tracks      int
-	Compilation bool
+	Key         string `json:"key"`
+	Artist      string `json:"artist"`
+	Title       string `json:"title"`
+	Year        int    `json:"year,omitempty"`
+	Tracks      int    `json:"tracks"`
+	Compilation bool   `json:"compilation,omitempty"`
 }
 
 // track is what is read of one track.

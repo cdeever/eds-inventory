@@ -1,0 +1,21 @@
+[Unit]
+Description=eds-inventory inventoryd (container)
+Wants=network-online.target
+After=network-online.target
+
+# On EdS's services workload, beside voiced, which asks it (EdS ADR-0047;
+# ADR-0003 here). It answers on 127.0.0.1:8740 only: everything that asks it
+# is on the same host. /var/lib/eds-inventory holds the database, owned by
+# distroless's nonroot user, 65532.
+[Service]
+Environment=IMAGE=localhost/eds-inventory:latest
+ExecStartPre=-/usr/bin/podman rm -f eds-inventory
+ExecStart=/usr/bin/podman run --rm --name eds-inventory --network host \
+  -v /var/lib/eds-inventory:/data:Z \
+  ${IMAGE}
+ExecStop=/usr/bin/podman stop -t 10 eds-inventory
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

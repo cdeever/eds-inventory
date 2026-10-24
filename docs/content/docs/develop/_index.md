@@ -12,6 +12,7 @@ project directory at a time.
 | Path | Language | Entry point |
 |---|---|---|
 | `services/inventory` | Go 1.26, SQLite | `make check build`, `make collect XML=…`, `make run` |
+| `deploy` | make, podman on the Builder | `make image load unit library WHERE=builder` |
 | `docs` | Hugo | `make server` |
 
 After a fresh clone, fetch the docs theme:

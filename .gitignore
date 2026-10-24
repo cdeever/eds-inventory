@@ -13,3 +13,6 @@ services/*/bin/
 *.db
 *.db-shm
 *.db-wal
+
+# what deploy/ makes from an owner's library on its way out
+deploy/albums.json
