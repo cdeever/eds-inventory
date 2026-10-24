@@ -35,6 +35,9 @@ listed as a question.
   outgrown ([ADR-0001](/docs/architecture/decisions/0001-go-services-and-a-sqlite-store/)).
 - **The first source is the iTunes library**, collected from its XML
   ([ADR-0002](/docs/architecture/decisions/0002-the-itunes-library-is-collected-from-its-xml/)).
+- **Discographies come from MusicBrainz**, enriched once in the background
+  and kept, so "their first album" is answered without waiting on anyone
+  ([ADR-0004](/docs/architecture/decisions/0004-discographies-are-enriched-once-from-musicbrainz/)).
 
 ## What its first client would ask
 

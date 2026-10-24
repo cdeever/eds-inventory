@@ -4,6 +4,8 @@
 //	inventory collect itunes "iTunes Library.xml"   (or albums.json)
 //	inventory albums itunes "iTunes Library.xml" > albums.json
 //	inventory find ARTIST [TITLE...]
+//	inventory enrich ARTIST            (from MusicBrainz, now)
+//	inventory nth ARTIST N
 //
 // albums writes only what is collected - each album's artist, title, year,
 // track count and whether it is a compilation - so the library's XML, with
@@ -22,7 +24,9 @@ import (
 	"time"
 
 	"github.com/cdeever/eds-inventory/services/inventory/internal/catalog"
+	"github.com/cdeever/eds-inventory/services/inventory/internal/enrich"
 	"github.com/cdeever/eds-inventory/services/inventory/internal/itunes"
+	"github.com/cdeever/eds-inventory/services/inventory/internal/musicbrainz"
 	"github.com/cdeever/eds-inventory/services/inventory/internal/store"
 )
 
@@ -102,6 +106,58 @@ func main() {
 			fmt.Printf("  %s  %q, for %q\n", al.ID, al.Title, by)
 		}
 
+	case "enrich", "nth":
+		live := &catalog.Live{Store: s}
+		c, err := live.Catalog(ctx)
+		check(err)
+		a, score := c.FindArtist(os.Args[2])
+		if a == nil {
+			fmt.Printf("no artist like %q (%.2f)\n", os.Args[2], score)
+			os.Exit(1)
+		}
+		if os.Args[1] == "enrich" {
+			base := os.Getenv("INV_MUSICBRAINZ")
+			if base == "" {
+				base = "https://musicbrainz.org"
+			}
+			e := &enrich.Enricher{Store: s, Live: live,
+				MB: &musicbrainz.Client{Base: base, UserAgent: "eds-inventory/dev ( https://github.com/cdeever/eds-inventory )"}}
+			check(e.Artist(ctx, store.ArtistRef{ID: a.ID, Name: a.Name}))
+			c, _ = live.Catalog(ctx)
+			a = c.Artist(a.ID)
+			if d := a.Discography; d != nil {
+				fmt.Printf("%s: %d studio albums, %d aliases\n", d.Name, len(d.Albums), len(a.Aliases))
+				assigned := catalog.Assign(a)
+				for i, sa := range d.Albums {
+					mark := ""
+					if owned := assigned[sa.ReleaseGroup]; owned != nil {
+						mark = "  owned as " + owned.Title
+					}
+					fmt.Printf("  %2d  %-10s %s%s\n", i+1, sa.Released, sa.Title, mark)
+				}
+			}
+			return
+		}
+		if len(os.Args) != 4 {
+			usage()
+		}
+		var n int
+		_, err = fmt.Sscan(os.Args[3], &n)
+		check(err)
+		got := catalog.NthOwned(a, n, 6)
+		fmt.Printf("%s, %d, by %s\n", a.Name, n, got.Order)
+		if got.Counted != nil {
+			fmt.Printf("  counted: %s (%s)\n", got.Counted.Title, got.Counted.Released)
+		}
+		if got.Album == nil {
+			fmt.Println("  none owned")
+			os.Exit(1)
+		}
+		fmt.Printf("  album:   %s\n", got.Album.Title)
+		for _, al := range got.Instead {
+			fmt.Printf("  instead: %s\n", al.Title)
+		}
+
 	default:
 		usage()
 	}
@@ -139,6 +195,8 @@ func usage() {
 	fmt.Fprintln(os.Stderr, `usage: inventory collect itunes "iTunes Library.xml" | albums.json
        inventory albums itunes "iTunes Library.xml" > albums.json
        inventory find ARTIST [TITLE...]
+       inventory enrich ARTIST
+       inventory nth ARTIST N
 The database is $INV_DB, or inventory.db.`)
 	os.Exit(2)
 }

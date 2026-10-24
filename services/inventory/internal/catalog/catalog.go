@@ -57,6 +57,11 @@ func (c *Catalog) FindArtist(name string) (*store.Artist, float64) {
 	for i := range c.Artists {
 		a := &c.Artists[i]
 		s := artistScore(want, fold.Name(a.Name))
+		// The names MusicBrainz knows them by count as theirs: "Leonard
+		// Skinner" is an alias of Lynyrd Skynyrd's (EdS, 2026-10-24).
+		for _, alias := range a.Aliases {
+			s = max(s, artistScore(want, fold.Name(alias)))
+		}
 		// The same score: the artist with more albums is likelier the one.
 		if s > score || (s == score && best != nil && len(a.Albums) > len(best.Albums)) {
 			best, score = a, s
@@ -283,4 +288,169 @@ func (l *Live) Catalog(ctx context.Context) (*Catalog, error) {
 	}
 	l.cat, l.version = &Catalog{Artists: artists}, v
 	return l.cat, nil
+}
+
+// Nth is what the Nth album an artist has comes to.
+type Nth struct {
+	// Order is what was counted: "musicbrainz", the artist's studio albums
+	// as MusicBrainz orders them, or "library", the owner's own albums by
+	// the year the inventory gives them, when there is no discography.
+	Order string
+	// Counted is the Nth studio album as MusicBrainz counts it, owned or
+	// not; nil when counted by the library, or there are not that many.
+	Counted *store.StudioAlbum
+	// Album is the owner's album: the Nth if owned, else the next in order
+	// that is (EdS ADR-0045). Nil when none is.
+	Album *store.Album
+	// Instead are the owner's albums after it, in order, up to the number
+	// asked for.
+	Instead []store.Album
+}
+
+// NthOwned is the Nth album of the artist's that the owner has, counted
+// from 1; a negative n counts from the newest, so -1 is the latest. With a
+// discography, the studio albums are counted, and each is looked for under
+// its own title and the names its releases have gone by: Genesis' first is
+// From Genesis to Revelation, owned as And the Word Was. Without one, the
+// owner's own albums are counted by year.
+func NthOwned(a *store.Artist, n, instead int) Nth {
+	if d := a.Discography; d != nil && d.Found && len(d.Albums) > 0 {
+		out := Nth{Order: "musicbrainz"}
+		seq := inOrder(d.Albums, n)
+		if len(seq) > 0 {
+			out.Counted = &seq[0]
+		}
+		owned := Assign(a)
+		var picked []store.Album
+		for _, sa := range seq {
+			al := owned[sa.ReleaseGroup]
+			if al == nil || containsAlbum(picked, al.ID) {
+				continue
+			}
+			picked = append(picked, *al)
+			if len(picked) > instead {
+				break
+			}
+		}
+		if len(picked) > 0 {
+			out.Album, out.Instead = &picked[0], picked[1:]
+		}
+		return out
+	}
+	out := Nth{Order: "library"}
+	seq := inOrder(ByYear(a), n)
+	if len(seq) > 0 {
+		out.Album = &seq[0]
+		out.Instead = seq[1:min(len(seq), instead+1)]
+	}
+	return out
+}
+
+// inOrder is a list from the Nth on: later ones for the first or the Nth,
+// earlier ones for the latest.
+func inOrder[T any](list []T, n int) []T {
+	var out []T
+	switch {
+	case n > 0 && n <= len(list):
+		out = append(out, list[n-1:]...)
+	case n < 0 && -n <= len(list):
+		for i := len(list) + n; i >= 0; i-- {
+			out = append(out, list[i])
+		}
+	}
+	return out
+}
+
+func containsAlbum(list []store.Album, id string) bool {
+	for _, al := range list {
+		if al.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
+// Assign says which of the owner's albums each studio album is, by its
+// release group: each owned album is one studio album at most. Each studio
+// album's own title is looked for first; then, for those not found, the
+// names its releases have gone by - but never a name that is another studio
+// album's own, nor an album already found. Genesis' first, From Genesis to
+// Revelation, has releases titled "Genesis", which is their 1983 album's own
+// name (owner's library, 2026-10-24).
+func Assign(a *store.Artist) map[string]*store.Album {
+	out := map[string]*store.Album{}
+	if a.Discography == nil {
+		return out
+	}
+	taken := map[string]bool{}
+	own := map[string]bool{}
+	for _, sa := range a.Discography.Albums {
+		own[fold.Title(sa.Title)] = true
+	}
+	for _, sa := range a.Discography.Albums {
+		if al := ownedExcept(a, taken, sa.Title); al != nil {
+			out[sa.ReleaseGroup], taken[al.ID] = al, true
+		}
+	}
+	for _, sa := range a.Discography.Albums {
+		if out[sa.ReleaseGroup] != nil {
+			continue
+		}
+		var others []string
+		for _, t := range sa.OtherTitles {
+			if !own[fold.Title(t)] {
+				others = append(others, t)
+			}
+		}
+		if al := ownedExcept(a, taken, others...); al != nil {
+			out[sa.ReleaseGroup], taken[al.ID] = al, true
+		}
+	}
+	return out
+}
+
+// ownedExcept is Owned, passing over albums already taken.
+func ownedExcept(a *store.Artist, taken map[string]bool, titles ...string) *store.Album {
+	if len(taken) == 0 {
+		al, _ := Owned(a, titles...)
+		return al
+	}
+	rest := *a
+	rest.Albums = nil
+	for _, al := range a.Albums {
+		if !taken[al.ID] {
+			rest.Albums = append(rest.Albums, al)
+		}
+	}
+	al, _ := Owned(&rest, titles...)
+	if al == nil {
+		return nil
+	}
+	for i := range a.Albums {
+		if a.Albums[i].ID == al.ID {
+			return &a.Albums[i]
+		}
+	}
+	return nil
+}
+
+// Unmatched are the artist's own albums, by the library's account, that no
+// studio album of their discography is found as: the albums enrichment asks
+// MusicBrainz for more names to find. Compilations, and what is named as
+// one, are not studio albums and are never looked for.
+func Unmatched(a *store.Artist) []store.Album {
+	if a.Discography == nil {
+		return nil
+	}
+	found := map[string]bool{}
+	for _, al := range Assign(a) {
+		found[al.ID] = true
+	}
+	var out []store.Album
+	for _, al := range ByYear(a) {
+		if !found[al.ID] {
+			out = append(out, al)
+		}
+	}
+	return out
 }

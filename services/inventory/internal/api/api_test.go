@@ -15,11 +15,20 @@ import (
 	"time"
 
 	"github.com/cdeever/eds-inventory/services/inventory/internal/catalog"
+	"github.com/cdeever/eds-inventory/services/inventory/internal/enrich"
 	"github.com/cdeever/eds-inventory/services/inventory/internal/itunes"
+	"github.com/cdeever/eds-inventory/services/inventory/internal/musicbrainz"
+	"github.com/cdeever/eds-inventory/services/inventory/internal/musicbrainz/mbtest"
 	"github.com/cdeever/eds-inventory/services/inventory/internal/store"
 )
 
 func server(t *testing.T) *httptest.Server {
+	t.Helper()
+	srv, _ := serverWithStore(t)
+	return srv
+}
+
+func serverWithStore(t *testing.T) (*httptest.Server, *store.Store) {
 	t.Helper()
 	s, err := store.Open(filepath.Join(t.TempDir(), "inventory.db"))
 	if err != nil {
@@ -37,9 +46,9 @@ func server(t *testing.T) *httptest.Server {
 	if _, err := s.Collect(context.Background(), itunes.Source, h, time.Unix(1000, 0)); err != nil {
 		t.Fatal(err)
 	}
-	srv := httptest.NewServer(Handler(&catalog.Live{Store: s}, slog.New(slog.NewTextHandler(io.Discard, nil))))
+	srv := httptest.NewServer(Handler(&catalog.Live{Store: s}, nil, slog.New(slog.NewTextHandler(io.Discard, nil))))
 	t.Cleanup(srv.Close)
-	return srv
+	return srv, s
 }
 
 func get(t *testing.T, srv *httptest.Server, path string, want int) map[string]any {
@@ -120,7 +129,7 @@ func TestAnArtistsAlbumsByYear(t *testing.T) {
 	srv := server(t)
 	got := get(t, srv, "/v1/artists/"+artistID(t, srv, "Genesis")+"/albums/by-year", 200)
 	albums := got["albums"].([]any)
-	if len(albums) != 3 || albums[0].(map[string]any)["title"] != "Trespass" {
+	if len(albums) != 4 || albums[0].(map[string]any)["title"] != "Trespass" {
 		t.Errorf("%v", got)
 	}
 }
@@ -162,4 +171,50 @@ func TestTheContractDescribesEveryRoute(t *testing.T) {
 		t.Fatalf("%v %v", resp, err)
 	}
 	resp.Body.Close()
+}
+
+// Before enrichment, the Nth is counted by the library's years.
+func TestTheNthAlbumBeforeEnrichmentIsTheLibrarys(t *testing.T) {
+	srv := server(t)
+	got := get(t, srv, "/v1/artists/"+artistID(t, srv, "Genesis")+"/albums/nth?n=1&instead=1", 200)
+	al, _ := got["album"].(map[string]any)
+	if got["order"] != "library" || al == nil || al["title"] != "Trespass" || len(got["instead"].([]any)) != 1 || got["counted"] != nil {
+		t.Errorf("%v", got)
+	}
+	if d := get(t, srv, "/v1/artists/"+artistID(t, srv, "Genesis")+"/discography", 200); d["discography"] != nil {
+		t.Errorf("%v", d)
+	}
+	get(t, srv, "/v1/artists/"+artistID(t, srv, "Genesis")+"/albums/nth?n=0", 400)
+	get(t, srv, "/v1/artists/"+artistID(t, srv, "Genesis")+"/albums/nth?n=1&instead=99", 400)
+}
+
+// Enriched, the Nth is MusicBrainz's count, found among the owner's albums
+// under any name its releases have had; an alias finds the artist.
+func TestTheNthAlbumEnrichedIsMusicBrainzsCount(t *testing.T) {
+	srv, s := serverWithStore(t)
+	mb := mbtest.New(t)
+	e := &enrich.Enricher{Store: s, MB: &musicbrainz.Client{Base: mb.URL, UserAgent: "test", Gap: time.Millisecond},
+		Live: &catalog.Live{Store: s}, Logger: slog.New(slog.NewTextHandler(io.Discard, nil))}
+	for {
+		refs, _ := s.ToEnrich(context.Background(), time.Now().Add(-time.Hour), 1)
+		if len(refs) == 0 {
+			break
+		}
+		if err := e.Artist(context.Background(), refs[0]); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got := get(t, srv, "/v1/artists/"+artistID(t, srv, "Genesis")+"/albums/nth?n=1", 200)
+	al, _ := got["album"].(map[string]any)
+	counted, _ := got["counted"].(map[string]any)
+	if got["order"] != "musicbrainz" || al == nil || al["title"] != "And The Word Was" || counted["title"] != "From Genesis to Revelation" {
+		t.Errorf("%v", got)
+	}
+	if id := artistID(t, srv, "Leonard Skinner"); id != artistID(t, srv, "Lynyrd Skynyrd") {
+		t.Errorf("the alias found %s", id)
+	}
+	d := get(t, srv, "/v1/artists/"+artistID(t, srv, "Led Zeppelin")+"/discography", 200)["discography"].(map[string]any)
+	if d["found"] != true || len(d["albums"].([]any)) != 4 {
+		t.Errorf("%v", d)
+	}
 }

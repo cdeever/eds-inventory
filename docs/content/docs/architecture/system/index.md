@@ -37,8 +37,11 @@ collection.
 
 ## Enrichment
 
-When the inventory meets an album it does not know, it asks the services
-that know about music, once:
+When the inventory meets an artist it does not know, it asks the services
+that know about music, once, in the background. Built so far: each artist's
+studio albums, aliases and albums' other names, from MusicBrainz
+([ADR-0004](/docs/architecture/decisions/0004-discographies-are-enriched-once-from-musicbrainz/)).
+Planned:
 
 | Service | For |
 |---|---|

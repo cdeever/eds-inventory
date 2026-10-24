@@ -21,7 +21,7 @@
     "/v1/artists/find": {
       "get": {
         "summary": "The artist nearest a name",
-        "description": "Spelling and sound are both weighed, for names written down from speech. Below 0.90 the artist is null.",
+        "description": "Spelling and sound are both weighed, for names written down from speech, against the artist's name and the aliases MusicBrainz knows them by. Below 0.90 the artist is null.",
         "parameters": [ { "name": "name", "in": "query", "required": true, "schema": { "type": "string" } } ],
         "responses": {
           "200": {
@@ -89,6 +89,76 @@
         }
       }
     },
+    "/v1/artists/{id}/albums/nth": {
+      "get": {
+        "summary": "The Nth album of an artist's that the owner has",
+        "description": "Counted among the artist's studio albums as MusicBrainz orders them (order musicbrainz), each looked for under its own title and its releases' other names; the Nth if owned, else the next that is. Before the artist is enriched, the owner's own albums by year (order library), and the artist is put first in line to be enriched. Never a compilation.",
+        "parameters": [
+          { "$ref": "#/components/parameters/ArtistID" },
+          { "name": "n", "in": "query", "required": true, "schema": { "type": "integer", "not": { "const": 0 } }, "description": "1 for the first, -1 for the latest" },
+          { "name": "instead", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0, "maximum": 20, "default": 6 }, "description": "How many of the owner's albums after it to give" }
+        ],
+        "responses": {
+          "200": {
+            "description": "The album, or null",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "required": ["v", "n", "order", "counted", "album", "instead"],
+              "properties": {
+                "v": { "const": 1 },
+                "n": { "type": "integer" },
+                "order": { "enum": ["musicbrainz", "library"] },
+                "counted": { "oneOf": [ { "$ref": "#/components/schemas/StudioAlbum" }, { "type": "null" } ], "description": "The Nth studio album as MusicBrainz counts it, owned or not" },
+                "album": { "oneOf": [ { "$ref": "#/components/schemas/Album" }, { "type": "null" } ] },
+                "instead": { "type": "array", "items": { "$ref": "#/components/schemas/Album" } }
+              }
+            } } }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/artists/{id}/discography": {
+      "get": {
+        "summary": "An artist's studio albums, and which the owner has",
+        "description": "Null before the artist is enriched, and the artist is put first in line.",
+        "parameters": [ { "$ref": "#/components/parameters/ArtistID" } ],
+        "responses": {
+          "200": {
+            "description": "The discography, or null",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "required": ["v", "artist", "discography"],
+              "properties": {
+                "v": { "const": 1 },
+                "artist": { "type": "object", "properties": { "id": { "type": "string" }, "name": { "type": "string" } } },
+                "discography": { "oneOf": [ { "type": "null" }, {
+                  "type": "object",
+                  "required": ["name", "found", "fetched", "aliases", "albums"],
+                  "properties": {
+                    "name": { "type": "string", "description": "The artist as MusicBrainz names them" },
+                    "found": { "type": "boolean", "description": "False when MusicBrainz knows no such artist, or no studio album by them" },
+                    "fetched": { "type": "string", "format": "date-time" },
+                    "aliases": { "type": "array", "items": { "type": "string" } },
+                    "albums": { "type": "array", "items": {
+                      "type": "object",
+                      "properties": {
+                        "studio_album": { "$ref": "#/components/schemas/StudioAlbum" },
+                        "owned": { "oneOf": [ { "$ref": "#/components/schemas/Album" }, { "type": "null" } ] }
+                      }
+                    } }
+                  }
+                } ] }
+              }
+            } } }
+          },
+          "404": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
     "/v1/artists/{id}/albums/by-year": {
       "get": {
         "summary": "An artist's own albums by year",
@@ -121,6 +191,16 @@
           "id": { "type": "string" },
           "name": { "type": "string" },
           "albums": { "type": "array", "items": { "$ref": "#/components/schemas/Album" } }
+        }
+      },
+      "StudioAlbum": {
+        "type": "object",
+        "required": ["title", "release_group"],
+        "properties": {
+          "title": { "type": "string", "description": "As MusicBrainz names it, with straight quotes" },
+          "released": { "type": "string", "description": "Its first release, YYYY[-MM[-DD]]" },
+          "release_group": { "type": "string", "description": "MusicBrainz's release group id" },
+          "other_titles": { "type": "array", "items": { "type": "string" }, "description": "Names its releases have gone by, when asked for" }
         }
       },
       "Album": {

@@ -16,9 +16,18 @@ and README, and nothing builds the whole.
 
 | Path | What | Build entry |
 |---|---|---|
-| `services/inventory` | Go 1.26, SQLite (no cgo): store, iTunes collector, HTTP API v1 | `make check build`, `make collect XML=…`, `make run` |
+| `services/inventory` | Go 1.26, SQLite (no cgo): store, iTunes collector, MusicBrainz enrichment, HTTP API v1 | `make check build`, `make collect XML=…`, `make run` |
 | `deploy` | onto EdS's services workload (ADR-0003) | `make image load unit WHERE=builder`, `make library XML=…` |
 | `docs` | Hugo | `make server` |
+
+**Enrichment runs in inventoryd, in the background** (ADR-0004): each
+artist's studio albums, aliases and, only when needed, albums' other names,
+from MusicBrainz, one call each 1.5 s, an artist asked about first. No
+answer waits on MusicBrainz; tests use `internal/musicbrainz/mbtest`, never
+the real one. Which owned album is which studio album is `catalog.Assign`,
+worked out when asked and never stored: own titles first, then other names
+that are no studio album's own (a release of Genesis' first is titled
+"Genesis").
 
 `internal/fold` and `internal/catalog`'s matching came from EdS's
 `services/nowplaying/internal/library` (EdS ADR-0046); their thresholds were
