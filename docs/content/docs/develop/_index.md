@@ -11,10 +11,8 @@ project directory at a time.
 
 | Path | Language | Entry point |
 |---|---|---|
+| `services/inventory` | Go 1.26, SQLite | `make check build`, `make collect XML=…`, `make run` |
 | `docs` | Hugo | `make server` |
-
-Services, the database and the collection and enrichment workflows will be
-added here as they are decided.
 
 After a fresh clone, fetch the docs theme:
 

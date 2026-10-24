@@ -1,0 +1,150 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "eds-inventory",
+    "version": "1",
+    "description": "One inventory of the owner's music, in every format. Every answer carries \"v\": 1. An answer the inventory is not sure of is null, with the score it reached."
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "summary": "Whether the service is up",
+        "responses": { "200": { "description": "ok", "content": { "text/plain": {} } } }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "summary": "This document",
+        "responses": { "200": { "description": "The contract", "content": { "application/json": {} } } }
+      }
+    },
+    "/v1/artists/find": {
+      "get": {
+        "summary": "The artist nearest a name",
+        "description": "Spelling and sound are both weighed, for names written down from speech. Below 0.90 the artist is null.",
+        "parameters": [ { "name": "name", "in": "query", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": {
+            "description": "The nearest artist, or null",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "required": ["v", "name", "score", "artist"],
+              "properties": {
+                "v": { "const": 1 },
+                "name": { "type": "string", "description": "The name asked for" },
+                "score": { "type": "number", "minimum": 0, "maximum": 1 },
+                "artist": { "oneOf": [ { "$ref": "#/components/schemas/Artist" }, { "type": "null" } ] }
+              }
+            } } }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/artists/{id}": {
+      "get": {
+        "summary": "An artist and their albums",
+        "parameters": [ { "$ref": "#/components/parameters/ArtistID" } ],
+        "responses": {
+          "200": {
+            "description": "The artist",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "required": ["v", "artist"],
+              "properties": { "v": { "const": 1 }, "artist": { "$ref": "#/components/schemas/Artist" } }
+            } } }
+          },
+          "404": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/artists/{id}/albums/find": {
+      "get": {
+        "summary": "One of an artist's albums, by title",
+        "description": "One title: the nearest album, with its score; below 0.90 it is null. Several titles, or studio=true: an album's names as a catalog gives them, main one first; the answer is the first the inventory has, never a compilation, and title says which name found it.",
+        "parameters": [
+          { "$ref": "#/components/parameters/ArtistID" },
+          { "name": "title", "in": "query", "required": true, "schema": { "type": "array", "items": { "type": "string" } }, "style": "form", "explode": true },
+          { "name": "studio", "in": "query", "required": false, "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "The album, or null",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "required": ["v", "title", "album"],
+              "properties": {
+                "v": { "const": 1 },
+                "title": { "type": ["string", "null"], "description": "The title asked for, or the one that found the album" },
+                "score": { "type": "number", "minimum": 0, "maximum": 1, "description": "Only when one title was asked for" },
+                "album": { "oneOf": [ { "$ref": "#/components/schemas/Album" }, { "type": "null" } ] }
+              }
+            } } }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/artists/{id}/albums/by-year": {
+      "get": {
+        "summary": "An artist's own albums by year",
+        "description": "Without compilations, and without what is named as one (greatest hits, live, best of). Albums with no year come last.",
+        "parameters": [ { "$ref": "#/components/parameters/ArtistID" } ],
+        "responses": {
+          "200": {
+            "description": "The albums, earliest first",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "required": ["v", "albums"],
+              "properties": { "v": { "const": 1 }, "albums": { "type": "array", "items": { "$ref": "#/components/schemas/Album" } } }
+            } } }
+          },
+          "404": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "ArtistID": { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "The inventory's own ID for the artist, ar_ and twelve hex digits" }
+    },
+    "schemas": {
+      "Artist": {
+        "type": "object",
+        "required": ["id", "name", "albums"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "albums": { "type": "array", "items": { "$ref": "#/components/schemas/Album" } }
+        }
+      },
+      "Album": {
+        "type": "object",
+        "required": ["id", "title", "tracks", "sources"],
+        "properties": {
+          "id": { "type": "string", "description": "The inventory's own ID, al_ and twelve hex digits; kept across collections" },
+          "title": { "type": "string", "description": "As the source spells it, so a player asked for it by name finds it" },
+          "year": { "type": "integer" },
+          "tracks": { "type": "integer" },
+          "compilation": { "type": "boolean" },
+          "sources": { "type": "array", "items": { "type": "string" }, "description": "The sources that hold it, such as itunes" }
+        }
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "The question could not be answered",
+        "content": { "application/json": { "schema": {
+          "type": "object",
+          "required": ["v", "error"],
+          "properties": { "v": { "const": 1 }, "error": { "type": "string" } }
+        } } }
+      }
+    }
+  }
+}

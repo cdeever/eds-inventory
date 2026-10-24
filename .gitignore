@@ -6,3 +6,10 @@ docs/.hugo_build.lock
 
 # macOS
 .DS_Store
+
+# Go builds, and inventories made while developing: an owner's library is
+# never committed, nor anything made from it.
+services/*/bin/
+*.db
+*.db-shm
+*.db-wal

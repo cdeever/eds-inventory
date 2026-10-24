@@ -12,7 +12,19 @@ Deevnet IoTaaS tenant, beside EdS's services, because a tenant has no way in
 from another; it shares the tenant, not the codebase or the boundary.
 
 A monorepo of independent projects, as EdS is: each has its own `Makefile`
-and README, and nothing builds the whole. Only `docs/` exists so far.
+and README, and nothing builds the whole.
+
+| Path | What | Build entry |
+|---|---|---|
+| `services/inventory` | Go 1.26, SQLite (no cgo): store, iTunes collector, HTTP API v1 | `make check build`, `make collect XML=…`, `make run` |
+| `docs` | Hugo | `make server` |
+
+`internal/fold` and `internal/catalog`'s matching came from EdS's
+`services/nowplaying/internal/library` (EdS ADR-0046); their thresholds were
+measured there. Only `internal/store` writes SQL. The contract is
+`internal/api`, and `internal/api/openapi.json` is held to its routes by a
+test: change both together. **An owner's library, and any database made
+from it, is never committed.**
 
 ## The boundary
 
