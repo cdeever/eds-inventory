@@ -17,6 +17,7 @@ and README, and nothing builds the whole.
 | Path | What | Build entry |
 |---|---|---|
 | `services/inventory` | Go 1.26, SQLite (no cgo): store, iTunes collector, HTTP API v1 | `make check build`, `make collect XML=…`, `make run` |
+| `deploy` | onto EdS's services workload (ADR-0003) | `make image load unit WHERE=builder`, `make library XML=…` |
 | `docs` | Hugo | `make server` |
 
 `internal/fold` and `internal/catalog`'s matching came from EdS's
@@ -25,6 +26,11 @@ measured there. Only `internal/store` writes SQL. The contract is
 `internal/api`, and `internal/api/openapi.json` is held to its routes by a
 test: change both together. **An owner's library, and any database made
 from it, is never committed.**
+
+`deploy/load.sh` is EdS's, copied; keep them alike (EdS INC-0002: never
+stream images to the workload by hand). EdS's voiced asks inventoryd at
+`127.0.0.1:8740` (EdS ADR-0047); a change to the contract is a change to
+its client in `../eds/services/nowplaying/internal/voice/inventory.go`.
 
 ## The boundary
 

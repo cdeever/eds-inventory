@@ -25,6 +25,7 @@ as EdS is. Nothing builds the repository as a whole.
 | Path | What | Build entry |
 |---|---|---|
 | `services/inventory` | Go 1.26, SQLite: the store, the iTunes collector, the HTTP API | `make check build run` |
+| `deploy` | onto EdS's services workload | `make image load unit library WHERE=builder` |
 | `docs` | Hugo, the hugo-book theme | `make server` |
 
 After a fresh clone:

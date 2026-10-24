@@ -1,0 +1,17 @@
+# inventory - inventoryd, and the inventory command beside it for
+# collecting (ADR-0001). Static binaries, no cgo, on distroless: the same
+# shape as EdS's Go services.
+FROM docker.io/library/golang:1.26 AS build
+ARG VERSION=dev
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/inventoryd ./cmd/inventoryd && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/inventory ./cmd/inventory
+
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /out/inventoryd /inventoryd
+COPY --from=build /out/inventory /inventory
+ENV INV_DB=/data/inventory.db INV_ADDR=127.0.0.1:8740
+ENTRYPOINT ["/inventoryd"]

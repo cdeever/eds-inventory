@@ -1,14 +1,22 @@
 // Command inventory collects a source into the inventory, and finds things
 // in it by hand.
 //
-//	inventory collect itunes "iTunes Library.xml"
+//	inventory collect itunes "iTunes Library.xml"   (or albums.json)
+//	inventory albums itunes "iTunes Library.xml" > albums.json
 //	inventory find ARTIST [TITLE...]
+//
+// albums writes only what is collected - each album's artist, title, year,
+// track count and whether it is a compilation - so the library's XML, with
+// its paths and play counts, need not leave the machine it is on. collect
+// takes that file as it takes the XML.
 //
 // The database is INV_DB (default inventory.db, here).
 package main
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -22,6 +30,19 @@ func main() {
 	if len(os.Args) < 3 {
 		usage()
 	}
+	if os.Args[1] == "albums" {
+		if len(os.Args) != 4 || os.Args[2] != itunes.Source {
+			usage()
+		}
+		albums, err := read(os.Args[3])
+		check(err)
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", " ")
+		check(enc.Encode(albums))
+		fmt.Fprintf(os.Stderr, "%s: %d albums\n", itunes.Source, len(albums))
+		return
+	}
+
 	path := os.Getenv("INV_DB")
 	if path == "" {
 		path = "inventory.db"
@@ -36,10 +57,7 @@ func main() {
 		if len(os.Args) != 4 || os.Args[2] != itunes.Source {
 			usage()
 		}
-		f, err := os.Open(os.Args[3])
-		check(err)
-		albums, err := itunes.Read(f)
-		f.Close()
+		albums, err := read(os.Args[3])
 		check(err)
 		h := make([]store.Holding, 0, len(albums))
 		for _, a := range albums {
@@ -89,8 +107,37 @@ func main() {
 	}
 }
 
+// read is a library's albums, from its XML or from what albums wrote.
+func read(path string) ([]itunes.Album, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	r := bufio.NewReader(f)
+	for {
+		b, err := r.Peek(1)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", path, err)
+		}
+		switch b[0] {
+		case ' ', '\t', '\r', '\n':
+			r.ReadByte()
+			continue
+		case '[':
+			var albums []itunes.Album
+			if err := json.NewDecoder(r).Decode(&albums); err != nil {
+				return nil, fmt.Errorf("%s: %w", path, err)
+			}
+			return albums, nil
+		}
+		return itunes.Read(r)
+	}
+}
+
 func usage() {
-	fmt.Fprintln(os.Stderr, `usage: inventory collect itunes "iTunes Library.xml"
+	fmt.Fprintln(os.Stderr, `usage: inventory collect itunes "iTunes Library.xml" | albums.json
+       inventory albums itunes "iTunes Library.xml" > albums.json
        inventory find ARTIST [TITLE...]
 The database is $INV_DB, or inventory.db.`)
 	os.Exit(2)

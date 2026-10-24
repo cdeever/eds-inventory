@@ -23,6 +23,14 @@ releases; it shares a tenant with its first client, not a codebase.
 Sharing a tenant does not change the boundary. The inventory still knows
 nothing about EdS, and is still reached only through its contract.
 
+## How it gets there
+
+`deploy/` builds the image on the Builder and runs it on EdS's services
+workload as `eds-inventory.service`, on `127.0.0.1:8740`, beside the voiced
+that asks it
+([ADR-0003](/docs/architecture/decisions/0003-it-deploys-itself-to-eds-workload/)).
+`make -C deploy library` sends the owner's albums, not the library's XML.
+
 ## Open
 
 - **Which services run where.** EdS's back end can run on one Pi

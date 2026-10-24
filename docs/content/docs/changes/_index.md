@@ -41,7 +41,6 @@ with its owner: **EdS CHG-0040**, **Deevnet CHG-0021**.
 
 ## Records
 
-None yet.
-
 | ID | Date | Change | Type | Status |
 |---|---|---|---|---|
+| CHG-0001 | 2026-10-24 | [inventoryd on EdS's Workload](2026/0001-inventoryd-on-eds-workload/) | Deployment | {{< status-badge "planned" "Planned" >}} |
