@@ -1,0 +1,37 @@
+# eds-inventory docs - the developer and user guide for eds-inventory.
+#
+# The site lives inside the eds-inventory monorepo, as eds-docs lives inside
+# EdS's, and follows the same pattern. A repository serves exactly one GitHub
+# Pages site, so the baseURL is the repository name (/eds-inventory/).
+baseURL = "https://cdeever.github.io/eds-inventory/"
+locale = "en-us"
+title = "eds-inventory"
+theme = "hugo-book"
+
+# "Last modified" dates come from git, which needs fetch-depth: 0 in CI.
+enableGitInfo = true
+
+[params]
+  BookTitle = "Contents"
+  BookTheme = "auto"
+  BookToC = true
+  BookSearch = true
+  BookRepo = "https://github.com/cdeever/eds-inventory"
+  # The site is not at the repository root, so the edit link needs the docs/
+  # prefix; .Path is relative to Hugo's working directory, which is docs/.
+  BookEditLink = '{{ .Site.Params.BookRepo }}/edit/main/docs/{{ .Path }}'
+  BookLastChangeLink = '{{ .Site.Params.BookRepo }}/commit/{{ .GitInfo.Hash }}'
+  BookSection = "docs"
+  # Resolve in-content markdown links through the theme so they honor the
+  # baseURL subpath (/eds-inventory/). Without this, absolute links like
+  # /docs/... render literally and 404 on the project Pages site.
+  BookPortableLinks = true
+  description = "Developer and user documentation for eds-inventory - one inventory of the owner's music, in every format"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.tableOfContents]
+    startLevel = 1
+    endLevel = 4

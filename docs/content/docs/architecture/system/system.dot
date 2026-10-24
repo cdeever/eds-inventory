@@ -1,0 +1,48 @@
+// eds-inventory: sources, store and clients. Drawn by GraphViz:
+//
+//   make -C docs diagrams
+//
+// writes system.svg beside this file, and both are committed: the site is
+// built by Hugo alone, which does not run dot. Styles follow EdS's pictures.
+digraph inventory {
+    graph [rankdir=LR, bgcolor="white", pad=0.3, nodesep=0.3, ranksep=0.7,
+           fontname="Helvetica,Arial,sans-serif", fontsize=13, newrank=true];
+    node  [shape=box, style="rounded,filled", fillcolor="white", color="#5b6470",
+           fontname="Helvetica,Arial,sans-serif", fontsize=11, margin="0.14,0.08"];
+    edge  [color="#5b6470", fontname="Helvetica,Arial,sans-serif", fontsize=9,
+           fontcolor="#3a4048", arrowsize=0.7];
+
+    subgraph cluster_sources {
+        label="Sources · each the truth for what it holds"; labeljust=l; style="rounded,filled"; fillcolor="#fdf3e3"; color="#d9b77a";
+        discogs  [label="Discogs\nthe vinyl collection", fillcolor="#fbe2b6"];
+        itunes   [label="iTunes\nthe digital library", fillcolor="#e6d9f5"];
+        musicbee [label="MusicBee\nthe digital library", fillcolor="#e6d9f5"];
+        spotify  [label="Spotify\nsaved albums", fillcolor="#e6d9f5"];
+        tidal    [label="Tidal\nsaved albums", fillcolor="#e6d9f5"];
+        manual   [label="By hand\nCDs and the rest"];
+    }
+
+    subgraph cluster_tenant {
+        label="eds-inventory · in EdS's Deevnet IoTaaS tenant"; labeljust=l; style="rounded,filled"; fillcolor="#eef7f1"; color="#8fbf9f";
+        collect [label="Collectors\none for each source"];
+        store   [label="The store\nevery album, one identity,\ncross-references, covers\n(database to be chosen)", shape=cylinder, fillcolor="#cfe9d8", margin="0.2,0.15"];
+        enrich  [label="Enrichment\nonce per album"];
+        api     [label="HTTP API\nversioned JSON, \"v\": 1\nOpenAPI", fillcolor="#fdecb0"];
+    }
+
+    outside [label="Outside services\nMusicBrainz · Cover Art Archive\nDeezer · iTunes Search", fillcolor="#f4f4f4", color="#9aa1aa"];
+
+    subgraph cluster_clients {
+        label="Clients"; labeljust=l; style="rounded,filled"; fillcolor="#fdeeee"; color="#d9a3a3";
+        eds    [label="EdS\nNow Playing · Voice Request\nthe same tenant", fillcolor="#f8d2d2"];
+        others [label="Others, later", style="rounded,dashed", color="#9aa1aa"];
+    }
+
+    { discogs; itunes; musicbee; spotify; tidal; manual } -> collect;
+    collect -> store;
+    store   -> enrich [dir=both, label="albums it\ndoes not know"];
+    enrich  -> outside [label="once"];
+    store   -> api;
+    api     -> eds    [dir=both, label="questions in\nanswers out"];
+    api     -> others [dir=both, style=dashed, color="#9aa1aa"];
+}
