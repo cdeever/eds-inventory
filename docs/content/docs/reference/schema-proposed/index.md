@@ -126,6 +126,17 @@ A date known only to the year (`1967`) sorts before one known to the day
 - **How enrichment fills the new shape**: an artist's studio albums made as
   album rows, an owned album matched to one by reference, two rows for one
   album merged; editions identified; tracks gathered into recordings.
+- **A MusicBrainz of its own**, self-hosted, as enrichment's upstream
+  ([Requirements](../../requirements/), open). It would be a database
+  beside this one, never part of it: these tables keep their own keys, and
+  MusicBrainz's IDs stay references.
+- **Fingerprints** ([Requirements](../../requirements/), open): an AcoustID
+  would be a `recording_ref` like any other; a landmark index for naming the
+  turntable would be a store of its own, made from the audio files.
+- **Captured vinyl** ([Requirements](../../requirements/), open): a capture
+  is a holding of the vinyl edition, from a source `capture`, with a
+  `holding_track` for each track kept; fully captured is every track of the
+  edition. "Best version" needs a medium preference ahead of resolution.
 - **`collection_run`**, a history of each collection (when, added, kept,
   removed): proposed, not agreed.
 - **Two artists who fold alike are one**: a known limit for now.
