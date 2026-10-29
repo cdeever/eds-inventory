@@ -68,6 +68,30 @@ From [EdS's proposal](https://cdeever.github.io/eds/docs/architecture/proposals/
 - An artist's albums, in order, so that "their first album" can be counted.
 - Whether the owner has an album, by the nearest artist and title.
 
+## Cases it must get right
+
+Records EdS named wrongly, kept here so each becomes a test when the
+inventory answers the question. Each is a case where a catalog's idea of an
+album is not the record, so naming it from the catalog by name alone fails.
+
+- **Journey, "Wheel in the Sky", on *Infinity*** (EdS, 2026-10-29). The
+  recognizer heard *Infinity*. Deezer lists the track only on live albums,
+  best-ofs and the 2008 re-recording *Revelation*, never on *Infinity*.
+  MusicBrainz has *Infinity* (1978, a studio album), but files the track as
+  "Wheel in the Sky (Part 1)" and "(Conclusion)", 115 recordings deep. EdS
+  named the live *Alive in America*, until a fix weighed the recognizer's
+  album as an original (EdS ADR-0038, revised). **Expected:** *Infinity*,
+  1978, with its own sleeve.
+- **Kansas, *Point of Know Return*** (EdS, 2026-10-29). The album is named
+  correctly, even when the recognizer says *The Best of Kansas* or
+  *Point of Know Return (Expanded Edition)*. The cover is wrong. Deezer has
+  no plain *Point of Know Return*: asked for it, it answers the live single
+  *Point of Know Return (Live 2019-20)* and the live album
+  *Point Of Know Return Live & Beyond* first, with one cover between them,
+  and the *Expanded Edition*, which carries the 1977 sleeve, third. EdS
+  takes the first. **Expected:** the 1977 sleeve, from the edition the owner
+  holds.
+
 ## Open
 
 - **Collecting.** How each source is read (an API, an export, a file on the
