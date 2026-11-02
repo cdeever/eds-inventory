@@ -72,4 +72,5 @@ up, not argued again.
 - [Sources, Store and Clients](system/): how music comes in, where it is
   kept, and who asks for it.
 - [Where It Runs](tenant/): in EdS's Deevnet IoTaaS tenant, and why.
+- [Proposals](proposals/): ideas not yet decided, and where the MVP stops.
 - [Decisions](decisions/): every choice, argued.
