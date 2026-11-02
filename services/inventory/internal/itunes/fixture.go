@@ -23,6 +23,9 @@ func FixtureXML() string {
 	add(9, map[string]string{"Artist": "Genesis", "Album": "And The Word Was", "Year": "1976", "Kind": "MPEG audio file"})
 	add(6, map[string]string{"Artist": "Genesis", "Album": "Trespass", "Year": "1974", "Kind": "MPEG audio file"})
 	add(8, map[string]string{"Artist": "Genesis", "Album": "Abacab", "Year": "1981", "Kind": "MPEG audio file"})
+	// Their 1983 album, named for them: one of their first album's releases
+	// has the same name.
+	add(9, map[string]string{"Artist": "Genesis", "Album": "Genesis", "Year": "1983", "Kind": "MPEG audio file"})
 	add(8, map[string]string{"Artist": "Lynyrd Skynyrd", "Album": "Pronounced leh-nerd skin-nerd", "Year": "1973"})
 	add(5, map[string]string{"Artist": "Lynyrd Skynyrd", "Album": "Pronounced Leh-Nerd Skin-Nerd", "Year": "1973"})
 	add(8, map[string]string{"Artist": "Lynyrd Skynyrd", "Album": "Second Helping", "Year": "1974"})

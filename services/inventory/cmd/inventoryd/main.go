@@ -1,8 +1,13 @@
 // Command inventoryd answers questions about the inventory over HTTP: the
 // contract in internal/api, version 1.
 //
-//	INV_DB    the database (default /var/lib/eds-inventory/inventory.db)
-//	INV_ADDR  where to listen (default 127.0.0.1:8740)
+//	INV_DB           the database (default /var/lib/eds-inventory/inventory.db)
+//	INV_ADDR         where to listen (default 127.0.0.1:8740)
+//	INV_MUSICBRAINZ  MusicBrainz, which artists are enriched from in the
+//	                 background (default https://musicbrainz.org; "off"
+//	                 enriches nothing)
+//	INV_CONTACT      who MusicBrainz is told is asking (default the
+//	                 repository's address)
 //
 // A database that cannot be opened stops it at once: an inventory that
 // answers nothing would look like an owner with no music.
@@ -21,6 +26,8 @@ import (
 
 	"github.com/cdeever/eds-inventory/services/inventory/internal/api"
 	"github.com/cdeever/eds-inventory/services/inventory/internal/catalog"
+	"github.com/cdeever/eds-inventory/services/inventory/internal/enrich"
+	"github.com/cdeever/eds-inventory/services/inventory/internal/musicbrainz"
 	"github.com/cdeever/eds-inventory/services/inventory/internal/store"
 )
 
@@ -49,9 +56,25 @@ func main() {
 		log.Error("the inventory could not be read", "db", path, "error", err)
 		os.Exit(1)
 	}
-	log.Info("inventoryd listening", "version", version, "addr", addr, "db", path, "artists", len(c.Artists))
+	// Enrichment runs beside the server, at MusicBrainz's pace; no answer
+	// waits on it (ADR-0004).
+	var asker api.Asker
+	mbBase := env("INV_MUSICBRAINZ", "https://musicbrainz.org")
+	if mbBase != "off" {
+		contact := env("INV_CONTACT", "https://github.com/cdeever/eds-inventory")
+		e := &enrich.Enricher{
+			Store:  s,
+			Live:   live,
+			Logger: log,
+			MB: &musicbrainz.Client{Base: mbBase, HTTP: &http.Client{Timeout: 20 * time.Second},
+				UserAgent: "eds-inventory/" + version + " ( " + contact + " )"},
+		}
+		go e.Run(ctx)
+		asker = e
+	}
+	log.Info("inventoryd listening", "version", version, "addr", addr, "db", path, "artists", len(c.Artists), "musicbrainz", mbBase)
 
-	srv := &http.Server{Addr: addr, Handler: api.Handler(live, log), ReadHeaderTimeout: 5 * time.Second}
+	srv := &http.Server{Addr: addr, Handler: api.Handler(live, asker, log), ReadHeaderTimeout: 5 * time.Second}
 	go func() {
 		<-ctx.Done()
 		shut, cancel := context.WithTimeout(context.Background(), 5*time.Second)

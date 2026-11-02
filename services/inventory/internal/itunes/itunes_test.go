@@ -20,7 +20,7 @@ func read(t *testing.T) map[string]Album {
 
 func TestTheLibrarysMusicIsItsAlbums(t *testing.T) {
 	got := read(t)
-	if len(got) != 14 {
+	if len(got) != 15 {
 		t.Errorf("%d albums: %v", len(got), got)
 	}
 	for _, not := range []string{"Genesis / Live at Wembley", "Genesis / A Podcast"} {

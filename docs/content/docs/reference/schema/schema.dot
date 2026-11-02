@@ -1,4 +1,4 @@
-// The inventory's database, as internal/store creates it (schema version 1).
+// The inventory's database, as internal/store creates it (schema version 2).
 // Drawn by GraphViz: `make -C docs diagrams` writes schema.svg beside this
 // file, and both are committed. Change this with the schema in
 // internal/store/store.go and the data dictionary beside it.
@@ -11,7 +11,7 @@ digraph schema {
     artists [label=<
       <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#8fbf9f">
         <tr><td bgcolor="#cfe9d8" colspan="2"><b>artists</b></td></tr>
-        <tr><td port="id" align="left"><b>id</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td port="id" align="left"><b>id</b></td><td port="idr" align="left">TEXT · PK</td></tr>
         <tr><td align="left">name</td><td align="left">TEXT</td></tr>
         <tr><td align="left">folded</td><td align="left">TEXT · UNIQUE</td></tr>
       </table>>];
@@ -44,6 +44,54 @@ digraph schema {
         <tr><td align="left">collected</td><td align="left">TEXT (RFC 3339)</td></tr>
         <tr><td align="left">albums</td><td align="left">INTEGER</td></tr>
       </table>>];
+
+    discographies [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#b49ad6">
+        <tr><td bgcolor="#e6d9f5" colspan="2"><b>discographies</b></td></tr>
+        <tr><td port="artist_id" align="left"><b>artist_id</b></td><td align="left">TEXT · PK, FK</td></tr>
+        <tr><td align="left">mbid</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">name</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">found</td><td align="left">INTEGER (0/1)</td></tr>
+        <tr><td align="left">fetched</td><td align="left">TEXT (RFC 3339)</td></tr>
+      </table>>];
+
+    studio_albums [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#b49ad6">
+        <tr><td bgcolor="#e6d9f5" colspan="2"><b>studio_albums</b></td></tr>
+        <tr><td port="artist_id" align="left"><b>artist_id</b></td><td align="left">TEXT · PK, FK</td></tr>
+        <tr><td align="left"><b>position</b></td><td align="left">INTEGER · PK</td></tr>
+        <tr><td align="left">release_group</td><td port="release_group" align="left">TEXT</td></tr>
+        <tr><td align="left">title</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">released</td><td align="left">TEXT</td></tr>
+        <tr><td align="left">titles_fetched</td><td align="left">TEXT (RFC 3339)</td></tr>
+      </table>>];
+
+    release_titles [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#b49ad6">
+        <tr><td bgcolor="#e6d9f5" colspan="2"><b>release_titles</b></td></tr>
+        <tr><td port="release_group" align="left"><b>release_group</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left"><b>title</b></td><td align="left">TEXT · PK</td></tr>
+        <tr><td align="left">uses</td><td align="left">INTEGER</td></tr>
+      </table>>];
+
+    artist_aliases [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#b49ad6">
+        <tr><td bgcolor="#e6d9f5" colspan="2"><b>artist_aliases</b></td></tr>
+        <tr><td port="artist_id" align="left"><b>artist_id</b></td><td align="left">TEXT · PK, FK</td></tr>
+        <tr><td align="left">alias</td><td align="left">TEXT</td></tr>
+        <tr><td align="left"><b>folded</b></td><td align="left">TEXT · PK</td></tr>
+      </table>>];
+
+    enrichments [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#9aa1aa">
+        <tr><td bgcolor="#f4f4f4" colspan="2"><b>enrichments</b></td></tr>
+        <tr><td align="left">n</td><td align="left">INTEGER</td></tr>
+      </table>>];
+
+    artists:idr:e -> discographies:artist_id:w [dir=back, label="one per artist,\nonce enriched"];
+    artists:idr:e -> studio_albums:artist_id:w [dir=back, label="their studio albums,\nin order"];
+    artists:idr:e -> artist_aliases:artist_id:w [dir=back, label="their other names"];
+    studio_albums:release_group:e -> release_titles:release_group:w [style=dashed, arrowhead=none, label="its releases'\nother names"];
 
     albums:artist_id:e -> artists:id:w [label="many albums\nby one artist"];
     holdings:album_id:e -> albums:id:w [label="each source's holding\nof one album"];

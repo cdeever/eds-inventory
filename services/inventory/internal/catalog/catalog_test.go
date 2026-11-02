@@ -134,7 +134,7 @@ func TestByYearLeavesOutWhatIsNotAnAlbum(t *testing.T) {
 		t.Errorf("%+v", a)
 	}
 	g := ByYear(artist(t, fixture(t), "Genesis"))
-	if len(g) != 3 || g[0].Title != "Trespass" || g[2].Title != "Abacab" {
+	if len(g) != 4 || g[0].Title != "Trespass" || g[2].Title != "Abacab" || g[3].Title != "Genesis" {
 		t.Errorf("%+v", g)
 	}
 }
