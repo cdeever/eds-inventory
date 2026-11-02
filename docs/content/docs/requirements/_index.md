@@ -44,9 +44,33 @@ listed as a question.
   lossless before lossy, then resolution and bitrate. Which copy can be
   played right now is the client's to know. The owner's preference of medium
   comes before resolution (see Open).
-- **The cover is the original's when owned**: the earliest edition the owner
-  has, vinyl first when two came out the same year. Covers belong to
-  editions.
+- **The cover is the album's original art**: the sleeve it is known by,
+  from its original release, whichever pressing or copy is played. A
+  pressing's own sleeve is later, if at all.
+- **What may be kept from Discogs**, by its
+  [API Terms of Use](https://support.discogs.com/hc/en-us/articles/360009334593-API-Terms-of-Use)
+  (last updated 2025-05-27; read 2026-11-02). The site's
+  [Terms of Service](https://support.discogs.com/hc/en-us/articles/360009334333-Terms-of-Service)
+  forbid scraping and send everything else to the API's terms.
+  - A release's titles, dates, format, track list, barcodes and other
+    identifiers, credits and links, and artists' names, are **CC0**, and
+    are kept like any other fact: an edition from Discogs is kept.
+  - The owner's **collection** (which releases they hold) and every
+    **image** are **Restricted Data**: a personal license, not to be passed
+    on, kept only as long as needed to serve, and never shown more than six
+    hours older than Discogs. So the collection is collected again at least
+    every six hours, and a holding that leaves it leaves the inventory.
+  - **No Discogs picture is kept.** Sleeves come from the Cover Art Archive,
+    for the album's original release; a Discogs image is
+    a fallback the client fetches when it shows it, as EdS does today.
+  - Whatever a client shows from Discogs is credited "Data provided by
+    Discogs.", linked to the page on discogs.com it came from, so the
+    inventory gives each Discogs fact its URL. The repository and anything
+    public carries "This application uses Discogs' API but is not
+    affiliated with, sponsored or endorsed by Discogs. 'Discogs' is a
+    trademark of Zink Media, LLC."
+  - Discogs may end access at any time; what is CC0 is kept, so the
+    editions survive it.
 - **It knows nothing about its clients.**
 - **It runs in EdS's Deevnet IoTaaS tenant**, beside EdS's services: a
   tenant has no way in from another, so its clients must share it.
@@ -92,8 +116,7 @@ album is not the record, so naming it from the catalog by name alone fails.
   *Point of Know Return (Live 2019-20)* and the live album
   *Point Of Know Return Live & Beyond* first, with one cover between them,
   and the *Expanded Edition*, which carries the 1977 sleeve, third. EdS
-  takes the first. **Expected:** the 1977 sleeve, from the edition the owner
-  holds.
+  takes the first. **Expected:** the 1977 sleeve, the album's original art.
 
 ## Open
 
@@ -151,10 +174,6 @@ album is not the record, so naming it from the catalog by name alone fails.
   a 24-bit vinyl capture would otherwise always outrank a 16-bit CD. A
   preference of medium, for all albums and perhaps for one, would come
   before resolution in "best copy". Which way it goes is not decided.
-- **What may be kept.** Discogs' terms ask that nothing of theirs be kept
-  longer than needed, and EdS today holds one Discogs cover, in memory. A
-  cache of Discogs' data and pictures may not be allowed, so covers may have
-  to come from elsewhere, the Cover Art Archive first.
 - **Covers.** Which cover is settled above; whether the inventory stores it
   or points to it, and at what sizes, is not.
 - **The contract.** Beyond the best copy, which questions are asked, and

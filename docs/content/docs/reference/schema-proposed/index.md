@@ -82,10 +82,11 @@ artist     Phil Collins (person)
    lossless before lossy, then resolution and bitrate. The inventory says
    which is best; EdS says which is reachable now, as it knows the house and
    the inventory does not.
-5. **The cover is the original's when owned**: the earliest owned edition,
-   vinyl first on a tie, since the sleeve is what the art was made for. With
-   no edition owned outright, the cover comes from outside as today. How
-   covers are kept is a decision still to make.
+5. **The cover is the album's original art**, its original release's,
+   whichever edition is owned or played (revised 2026-11-02, in the
+   [MVP proposal](/docs/architecture/proposals/mvp/)); so a cover belongs to
+   the album. An edition's own sleeve is later, if at all. How covers are
+   kept is a decision still to make.
 6. **A source is a table**, `source` (`id`, `last_collected_at`), and a
    holding's source is a foreign key to it. A collection's album count is
    gone; it is a count of holdings.
