@@ -97,6 +97,34 @@ func FindAlbum(a *store.Artist, title string) (*store.Album, float64) {
 	return find(a, title, false)
 }
 
+// AlbumMatch is an album found by its title alone, with its artist.
+type AlbumMatch struct {
+	Artist *store.Artist
+	Album  *store.Album
+	Score  float64
+}
+
+// FindAlbums are the albums near enough the title, whoever they are by: each
+// artist's nearest, nearest first, then by artist. EdS asks it for an album
+// said without its artist (EdS ADR-0055), and plays it only if one artist
+// has it.
+func (c *Catalog) FindAlbums(title string) []AlbumMatch {
+	var out []AlbumMatch
+	for i := range c.Artists {
+		a := &c.Artists[i]
+		if album, score := FindAlbum(a, title); album != nil {
+			out = append(out, AlbumMatch{Artist: a, Album: album, Score: score})
+		}
+	}
+	sort.SliceStable(out, func(i, j int) bool {
+		if out[i].Score != out[j].Score {
+			return out[i].Score > out[j].Score
+		}
+		return out[i].Artist.Name < out[j].Artist.Name
+	})
+	return out
+}
+
 // Owned is the first of titles the artist has an album for, in order, and
 // the title it was found by: an album's names as a catalog gives them, its
 // main one first and its reissues' after. A compilation is not an album by

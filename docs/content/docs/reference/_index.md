@@ -25,6 +25,7 @@ nearest thing the inventory has.
 | `GET /v1/artists/{id}/albums/by-year` | the artist's own albums, earliest first, without compilations or what is named as one |
 | `GET /v1/artists/{id}/albums/nth?n=N[&instead=K]` | the Nth album the owner has (1 the first, -1 the latest), counted among the artist's studio albums as MusicBrainz orders them (`"order": "musicbrainz"`), or by the library's years before the artist is enriched (`"library"`); the album counted, and the owner's albums after it, up to K (default 6) |
 | `GET /v1/artists/{id}/discography` | the artist's studio albums, each with the owner's album it is, or `null`; the discography is `null` before the artist is enriched |
+| `GET /v1/albums/find?title=T` | the albums near a title (0.90 or nearer), whoever they are by: each artist's nearest, nearest first, with its artist and score; an empty list for none. For an album asked for without its artist (EdS ADR-0055) |
 | `GET /healthz` | `ok` |
 
 Asking `nth` or `discography` about an artist not enriched yet puts them first

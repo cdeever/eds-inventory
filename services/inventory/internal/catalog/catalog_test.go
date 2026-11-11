@@ -157,3 +157,24 @@ func TestTheCatalogIsReadAgainAfterACollection(t *testing.T) {
 		t.Error("Genesis is not there after a collection with it")
 	}
 }
+
+// An album by its title alone: each artist's nearest, nearest first, and
+// every artist that has one, so that a title two share is said to be.
+func TestAlbumsAreFoundByTitleWhoeverTheyAreBy(t *testing.T) {
+	c := &Catalog{Artists: []store.Artist{
+		{ID: "ar_1", Name: "The Beatles", Albums: []store.Album{{ID: "al_1", Title: "Abbey Road"}, {ID: "al_2", Title: "Revolver"}}},
+		{ID: "ar_2", Name: "Weezer", Albums: []store.Album{{ID: "al_3", Title: "Weezer"}}},
+		{ID: "ar_3", Name: "Peter Gabriel", Albums: []store.Album{{ID: "al_4", Title: "Peter Gabriel"}}},
+		{ID: "ar_4", Name: "Peter Gabriel II", Albums: []store.Album{{ID: "al_5", Title: "Peter Gabriel"}}},
+	}}
+	if got := c.FindAlbums("Abby Road"); len(got) != 1 || got[0].Artist.Name != "The Beatles" || got[0].Album.Title != "Abbey Road" {
+		t.Errorf("Abby Road: %+v", got)
+	}
+	got := c.FindAlbums("Peter Gabriel")
+	if len(got) != 2 || got[0].Artist.Name != "Peter Gabriel" || got[1].Artist.Name != "Peter Gabriel II" {
+		t.Errorf("Peter Gabriel: %+v", got)
+	}
+	if got := c.FindAlbums("Sgt. Pepper"); len(got) != 0 {
+		t.Errorf("Sgt. Pepper: %+v", got)
+	}
+}

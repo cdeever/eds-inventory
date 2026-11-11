@@ -218,3 +218,28 @@ func TestTheNthAlbumEnrichedIsMusicBrainzsCount(t *testing.T) {
 		t.Errorf("%v", d)
 	}
 }
+
+// An album by its title alone, with its artist; none is an empty list.
+func TestAnAlbumIsFoundByTitleAlone(t *testing.T) {
+	srv := server(t)
+	got := get(t, srv, "/v1/albums/find?title=Abby+Road", 200)
+	albums := got["albums"].([]any)
+	if len(albums) != 1 {
+		t.Fatalf("%v", got)
+	}
+	m := albums[0].(map[string]any)
+	if m["artist"].(map[string]any)["name"] != "The Beatles" || m["album"].(map[string]any)["title"] != "Abbey Road" || m["score"].(float64) < catalog.AlbumLike {
+		t.Errorf("%v", got)
+	}
+	if got := get(t, srv, "/v1/albums/find?title=Sgt.+Pepper", 200); len(got["albums"].([]any)) != 0 {
+		t.Errorf("%v", got)
+	}
+	resp, err := http.Get(srv.URL + "/v1/albums/find")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("no title: %d", resp.StatusCode)
+	}
+}

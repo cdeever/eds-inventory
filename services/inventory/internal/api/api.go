@@ -52,6 +52,7 @@ var Routes = []string{
 	"GET /v1/artists/{id}/albums/by-year",
 	"GET /v1/artists/{id}/albums/nth",
 	"GET /v1/artists/{id}/discography",
+	"GET /v1/albums/find",
 }
 
 // Handler serves the contract. asker may be nil.
@@ -67,6 +68,7 @@ func Handler(c Catalogs, asker Asker, log *slog.Logger) http.Handler {
 		"GET /v1/artists/{id}/albums/by-year": h.byYear,
 		"GET /v1/artists/{id}/albums/nth":     h.nth,
 		"GET /v1/artists/{id}/discography":    h.discography,
+		"GET /v1/albums/find":                 h.findAlbums,
 	}
 	for _, r := range Routes {
 		mux.HandleFunc(r, handlers[r])
@@ -194,6 +196,38 @@ func (h *handler) findAlbum(w http.ResponseWriter, r *http.Request) {
 		found = by
 	}
 	answer(w, map[string]any{"v": Version, "title": found, "album": albumOf(album)})
+}
+
+// GET /v1/albums/find?title=T
+//
+// The albums near enough the title, whoever they are by: each artist's
+// nearest, nearest first. For an album asked for without its artist.
+func (h *handler) findAlbums(w http.ResponseWriter, r *http.Request) {
+	title := r.URL.Query().Get("title")
+	if title == "" {
+		fail(w, http.StatusBadRequest, "title is required")
+		return
+	}
+	c, ok := h.catalog(w, r)
+	if !ok {
+		return
+	}
+	type found struct {
+		Artist ArtistRef `json:"artist"`
+		Album  *Album    `json:"album"`
+		Score  float64   `json:"score"`
+	}
+	albums := []found{}
+	for _, m := range c.FindAlbums(title) {
+		albums = append(albums, found{Artist: ArtistRef{ID: m.Artist.ID, Name: m.Artist.Name}, Album: albumOf(m.Album), Score: m.Score})
+	}
+	answer(w, map[string]any{"v": Version, "title": title, "albums": albums})
+}
+
+// ArtistRef names an artist without its albums.
+type ArtistRef struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // GET /v1/artists/{id}/albums/by-year

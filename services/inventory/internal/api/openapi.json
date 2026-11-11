@@ -89,6 +89,39 @@
         }
       }
     },
+    "/v1/albums/find": {
+      "get": {
+        "summary": "Albums by title, whoever they are by",
+        "description": "Each artist's album nearest the title, if 0.90 or nearer, nearest first, then by artist. For an album asked for without its artist (EdS ADR-0055): one artist is the album, more are a question.",
+        "parameters": [
+          { "name": "title", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "The albums, perhaps none",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "required": ["v", "title", "albums"],
+              "properties": {
+                "v": { "const": 1 },
+                "title": { "type": "string" },
+                "albums": { "type": "array", "items": {
+                  "type": "object",
+                  "required": ["artist", "album", "score"],
+                  "properties": {
+                    "artist": { "type": "object", "required": ["id", "name"], "properties": { "id": { "type": "string" }, "name": { "type": "string" } } },
+                    "album": { "$ref": "#/components/schemas/Album" },
+                    "score": { "type": "number", "minimum": 0.9, "maximum": 1 }
+                  }
+                } }
+              }
+            } } }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
     "/v1/artists/{id}/albums/nth": {
       "get": {
         "summary": "The Nth album of an artist's that the owner has",
